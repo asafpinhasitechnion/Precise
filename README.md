@@ -20,7 +20,6 @@ The framework is designed for researchers working in immunotherapy, oncology, an
 - [Output](#output)
 - [Example](#example)
 - [Citation](#citation)
-- [License](#license)
 
 ---
 
@@ -158,8 +157,3 @@ print(f"LOO ROC AUC: {auc_score}")
 ## Citation
 If you use **Precise** in your research, please cite our bioRxiv preprint:
 > Pinhasi, Y., & Yizhak, K. (2024). Precise: Predictive Response Analysis from Single-Cell Expression. bioRxiv. https://doi.org/10.1101/2024.11.16.623986v1
-
----
-
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
