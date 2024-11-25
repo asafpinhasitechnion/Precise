@@ -7,7 +7,7 @@
 
 The framework is designed for researchers working in immunotherapy, oncology, and computational biology, facilitating insights into predictive biomarkers and mechanisms of response or non-response.
 
-<img src="https://github.com/user-attachments/assets/bb72a0df-5ee9-495c-99b9-e8e2ccc4bade" alt="EACR Poster Workflow" width="750" />
+<img src="https://github.com/user-attachments/assets/bb72a0df-5ee9-495c-99b9-e8e2ccc4bade" alt="EACR Poster Workflow" width="700" />
 
 ---
 
