@@ -50,7 +50,7 @@ Precise builds upon methods described in our preprint on bioRxiv: [10.1101/2024.
 ### Installation Steps
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/precise.git
+   git clone https://github.com/asafpinhasitechnion/precise.git
    cd precise
    ```
 2. Install dependencies:
