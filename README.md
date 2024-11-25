@@ -33,15 +33,6 @@ Precise builds upon methods described in our preprint on bioRxiv: [10.1101/2024.
 
 ---
 
-## Features
-- **Modular Workflow**: Flexible integration of feature selection, prediction, and visualization steps.
-- **Boruta Feature Selection**: Identifies robust gene markers for predictive modeling.
-- **SHAP Visualization**: Explains model predictions with interpretable plots.
-- **Reinforcement Learning**: Refines cell-level predictions iteratively.
-- **Comprehensive Outputs**: Generates annotated datasets, feature importance scores, and detailed plots.
-
----
-
 ## Installation
 
 ### Prerequisites
