@@ -7,8 +7,6 @@
 
 The framework is designed for researchers working in immunotherapy, oncology, and computational biology, facilitating insights into predictive biomarkers and mechanisms of response or non-response.
 
-<img src="https://github.com/user-attachments/assets/bb72a0df-5ee9-495c-99b9-e8e2ccc4bade" alt="EACR Poster Workflow" width="700" />
-
 ---
 
 ## Table of Contents
@@ -31,6 +29,8 @@ Precise builds upon methods described in our preprint on bioRxiv: [10.1101/2024.
 - Visualize feature importance via **SHAP** analysis.
 - Generate predictions using **XGBoost**.
 - Apply **reinforcement learning** to refine cell-level labels and uncover patterns in response/non-response predictions.
+
+<img src="https://github.com/user-attachments/assets/bb72a0df-5ee9-495c-99b9-e8e2ccc4bade" alt="EACR Poster Workflow" width="650" />
 
 ---
 
