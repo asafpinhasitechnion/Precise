@@ -93,11 +93,18 @@ class PredictionAnalyzer:
         estimator = copy.deepcopy(self.model)
         estimator.fit(X_train, y_train)
 
-        # Save feature importances
-        feature_importance_df = pd.DataFrame({
-            "Feature": X_train.columns,
-            "Importance": estimator.get_feature_importances()
-        }).sort_values(by="Importance", ascending=False)
+
+        feature_importance_df = None
+        if hasattr(estimator, "feature_importances_") and estimator.feature_importances_ is not None:
+            # Extract feature names from adata.var if available
+            feature_names = train_adata.var_names.tolist()  # Feature names from adata
+
+            # Create a DataFrame with feature importances
+            feature_importance_df = pd.DataFrame({
+                "Feature": feature_names,
+                "Importance": estimator.feature_importances_,
+            }).sort_values(by="Importance", ascending=False)
+
 
         # Iterate over samples in the test data
         for sample in test_adata.obs[self.sample_column].unique():

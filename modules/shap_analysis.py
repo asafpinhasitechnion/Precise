@@ -6,7 +6,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import torch
 from ML_models import get_model
-from xgb_estimator import XGBEstimator
 from utils import validate_anndata, validate_response_column
 
 
