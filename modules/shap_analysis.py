@@ -4,12 +4,14 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import torch
+from ML_models import get_model
 from xgb_estimator import XGBEstimator
 from utils import validate_anndata, validate_response_column
 
 
 class SHAPVisualizer:
-    def __init__(self, adata, output_dir='../results', target_column="response", sample_column="sample", colormap = 'plasma'):
+    def __init__(self, adata, model, model_name, args = None, output_dir='../results', target_column="response", sample_column="sample", colormap = 'plasma'):
         """
         Initialize the SHAPVisualizer with data, model, and directories.
 
@@ -21,20 +23,33 @@ class SHAPVisualizer:
         self.adata = adata
         self.target_column = target_column
         self.sample_column = sample_column
+        self.model_name = model_name
+        self.model = model
+        self.args = args
         validate_anndata(self.adata, [self.target_column, self.sample_column])
         validate_response_column(self.adata, self.target_column)
-        estimator = XGBEstimator(max_depth=6)
-        estimator.fit(adata.to_df(), adata.obs[target_column].values)
-        self.model = estimator._classifier
-        self.output_dir = output_dir
+        
         self.df = adata.to_df()
+        model.fit(self.df, adata.obs[target_column].values)
+        self.output_dir = output_dir
+        
         self.gene_names = list(self.df.columns)
         self.colormap = colormap
         os.makedirs(self.output_dir, exist_ok=True)
 
-        # Initialize SHAP Explainer and compute SHAP values
-        self.explainer = shap.TreeExplainer(self.model)
-        self.shap_values = self.explainer.shap_values(self.df)
+        if self.model_name in ['XGBClassifier', 'LightGBMClassifier', 'RandomForestClassifier', 'DecisionTreeClassifier']:
+            self.explainer = shap.TreeExplainer(self.model)
+            self.shap_values = self.explainer.shap_values(self.df)
+            if self.model_name == 'LightGBMClassifier':
+                self.shap_values = self.shap_values[1]
+        elif 'Neural' in self.model_name:
+            tensor_df = torch.tensor(self.df.values, dtype=torch.float32)
+            self.explainer = shap.DeepExplainer(self.model.model, tensor_df)
+            self.shap_values = self.explainer.shap_values(tensor_df)
+        else:
+            self.explainer = shap.Explainer(self.model, self.df)
+            self.shap_values = self.explainer(self.df).values
+            
 
     def shapely_score_barplot(self, top_k=20, title='Highest Shapely Score Genes', save_path=None):
         """
@@ -121,12 +136,14 @@ class SHAPVisualizer:
                 show=False,
                 dot_size=20
             )
-            gene2 = gene1
 
         fig = plt.gcf()
         ax = plt.gca()
 
-        ax.set_title(f'Interaction between {gene1} and {gene2}', fontsize=20)
+        if gene2:
+            ax.set_title(f'Interaction between {gene1} and {gene2}', fontsize=18)
+        else:
+            ax.set_title(f'Strongest Interaction with {gene1}', fontsize=18)
         ax.set_xlabel(ax.get_xlabel() + ' Expression', fontsize=16)
         ax.set_ylabel(ax.get_ylabel(), fontsize=16)
         ax.tick_params(axis='both', which='major', labelsize=14)
@@ -153,14 +170,31 @@ class SHAPVisualizer:
 
         sdata = self.adata[self.adata.obs[self.sample_column] != sample]
         temp = self.adata[self.adata.obs[self.sample_column] == sample]
+        df = sdata.to_df()
 
-        ce = XGBEstimator()
-        model = ce.fit(sdata.to_df(), sdata.obs[self.target_column])
-        explainer = shap.TreeExplainer(ce._classifier)
+        # Get and fit the model
+        ce = get_model(self.model_name, self.args)
+        ce.fit(df, sdata.obs[self.target_column])
 
+        # Select SHAP Explainer
+        if self.model_name in ['XGBoostClassifier', 'LightGBMClassifier', 'RandomForestClassifier', 'DecisionTreeClassifier']:
+            explainer = shap.TreeExplainer(ce.model, df)
+        elif 'Neural' in self.model_name:
+            tensor_df = torch.tensor(self.df.values, dtype=torch.float32)
+            explainer = shap.DeepExplainer(ce.model, tensor_df)
+        else:
+            explainer = shap.Explainer(ce.model, df)
+
+
+        # Compute SHAP values
         exp = explainer(temp.to_df())
 
-        shap.plots.waterfall(exp.mean(axis=0), show=False)
+        if isinstance(exp, list):
+            exp = exp[1]  # Take class 1 SHAP values
+        
+        aggr_exp = exp.mean(axis = 0)
+        # Generate Waterfall Plot
+        shap.plots.waterfall(aggr_exp, show=False)
         plt.tight_layout()
 
         if save_folder:
@@ -170,6 +204,7 @@ class SHAPVisualizer:
             print(f"Waterfall plot saved to {plot_path}")
         else:
             plt.show()
+
 
     def _create_mean_df(self):
         """
