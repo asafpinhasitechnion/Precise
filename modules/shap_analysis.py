@@ -176,18 +176,19 @@ class SHAPVisualizer:
         ce = get_model(self.model_name, self.args)
         ce.fit(df, sdata.obs[self.target_column])
 
+        exp = None
         # Select SHAP Explainer
         if self.model_name in ['XGBoostClassifier', 'LightGBMClassifier', 'RandomForestClassifier', 'DecisionTreeClassifier']:
             explainer = shap.TreeExplainer(ce.model, df)
         elif 'Neural' in self.model_name:
             tensor_df = torch.tensor(self.df.values, dtype=torch.float32)
             explainer = shap.DeepExplainer(ce.model, tensor_df)
+            exp = explainer.shap_values(torch.tensor(temp.to_df().values, dtype=torch.float32).to(self.model.device))
         else:
             explainer = shap.Explainer(ce.model, df)
-
-
-        # Compute SHAP values
-        exp = explainer(temp.to_df())
+        
+        if 'Neural' not in self.model_name:
+            exp = explainer(temp.to_df())
 
         if isinstance(exp, list):
             exp = exp[1]  # Take class 1 SHAP values
